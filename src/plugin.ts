@@ -29,13 +29,13 @@ const configSchema = z.object({
 });
 
 /**
- * Example Market analysis action
- * This demonstrates the simplest possible action structure on Haifu 
+ * Example token analysis action
+ * This demonstrates the simplest possible action structure on Haifu to analyze a token
  */
-const haifuAction: Action = {
-  name: 'HAIFU',
-  similes: ['HAIFU'],
-  description: 'Responds with a haifu message',
+const tokenAnalysisAction: Action = {
+  name: 'TOKEN_ANALYSIS',
+  similes: ['TOKEN_ANALYSIS'],
+  description: 'Analyzes the market and provides a summary of the current state of a token',
   validate: async (
     _runtime: IAgentRuntime,
     _message: Memory,
@@ -44,53 +44,6 @@ const haifuAction: Action = {
     // Always valid
     return true;
   },
-  handler: async (
-    _runtime: IAgentRuntime,
-    message: Memory,
-    _state: State | undefined,
-    _options: any,
-    callback?: HandlerCallback,
-    _responses?: Memory[]
-  ): Promise<ActionResult> => {
-    return {
-      text: 'hello world!',
-      success: true,
-      data: {
-        actions: ['HELLO_WORLD'],
-        source: message.content.source,
-      },
-    };
-  },
-};
-
-/**
- * Example HelloWorld action
- * This demonstrates the simplest possible action structure
- */
-/**
- * Action representing a hello world message.
- * @typedef {Object} Action
- * @property {string} name - The name of the action.
- * @property {string[]} similes - An array of related actions.
- * @property {string} description - A brief description of the action.
- * @property {Function} validate - Asynchronous function to validate the action.
- * @property {Function} handler - Asynchronous function to handle the action and generate a response.
- * @property {Object[]} examples - An array of example inputs and expected outputs for the action.
- */
-const helloWorldAction: Action = {
-  name: 'HELLO_WORLD',
-  similes: ['GREET', 'SAY_HELLO'],
-  description: 'Responds with a simple hello world message',
-
-  validate: async (
-    _runtime: IAgentRuntime,
-    _message: Memory,
-    _state: State | undefined
-  ): Promise<boolean> => {
-    // Always valid
-    return true;
-  },
-
   handler: async (
     _runtime: IAgentRuntime,
     message: Memory,
@@ -100,12 +53,12 @@ const helloWorldAction: Action = {
     _responses?: Memory[]
   ): Promise<ActionResult> => {
     try {
-      logger.info('Handling HELLO_WORLD action');
+      logger.info('Handling TOKEN_ANALYSIS action');
 
       // Simple response content for callback
       const responseContent: Content = {
-        text: 'hello world!',
-        actions: ['HELLO_WORLD'],
+        text: 'Here is the market analysis for the token',
+        actions: ['TOKEN_ANALYSIS'],
         source: message.content.source,
       };
 
@@ -119,32 +72,31 @@ const helloWorldAction: Action = {
         text: 'hello world!',
         success: true,
         data: {
-          actions: ['HELLO_WORLD'],
+          actions: ['TOKEN_ANALYSIS'],
           source: message.content.source,
         },
       };
     } catch (error) {
-      logger.error('Error in HELLO_WORLD action:', error);
+      logger.error('Error in TOKEN_ANALYSIS action:', error);
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   },
-
   examples: [
     [
       {
         name: '{{name1}}',
         content: {
-          text: 'Can you say hello?',
+          text: 'Can you analyze the market for this token?',
         },
       },
       {
         name: '{{name2}}',
         content: {
-          text: 'hello world!',
-          actions: ['HELLO_WORLD'],
+          text: 'Here is the market analysis for the token',
+          actions: ['MARKET_ANALYSIS'],
         },
       },
     ],
@@ -155,9 +107,9 @@ const helloWorldAction: Action = {
  * Example Hello World Provider
  * This demonstrates the simplest possible provider implementation
  */
-const helloWorldProvider: Provider = {
-  name: 'HELLO_WORLD_PROVIDER',
-  description: 'A simple example provider',
+const tokenAnalysisProvider: Provider = {
+  name: 'TOKEN_ANALYSIS_PROVIDER',
+  description: 'A provider that analyzes the market for a token',
 
   get: async (
     _runtime: IAgentRuntime,
@@ -165,7 +117,7 @@ const helloWorldProvider: Provider = {
     _state: State | undefined
   ): Promise<ProviderResult> => {
     return {
-      text: 'I am a provider',
+      text: 'I am a provider that analyzes the market for a token',
       values: {},
       data: {},
     };
@@ -230,7 +182,7 @@ export const husbandosPlugin: Plugin = {
       _runtime,
       { prompt, stopSequences = [] }: GenerateTextParams
     ) => {
-      return 'Never gonna give you up, never gonna let you down, never gonna run around and desert you...';
+      return 'The market for the token is doing well';
     },
     [ModelType.TEXT_LARGE]: async (
       _runtime,
@@ -243,36 +195,22 @@ export const husbandosPlugin: Plugin = {
         presencePenalty = 0.7,
       }: GenerateTextParams
     ) => {
-      return 'Never gonna make you cry, never gonna say goodbye, never gonna tell a lie and hurt you...';
+      return 'The market for the token is not doing well';
     },
   },
   routes: [
     {
-      name: 'hello-world-route',
-      path: '/helloworld',
+      name: 'token-analysis-route',
+      path: '/token-analysis',
       type: 'GET',
       handler: async (_req: any, res: any) => {
+        // TODO: get the token from the request
         // send a response
         res.json({
-          message: 'Hello World!',
+          message: 'Here is the market analysis for the token',
         });
       },
-    },
-    {
-      name: 'current-time-route',
-      path: '/api/time',
-      type: 'GET',
-      handler: async (_req: any, res: any) => {
-        // Return current time in various formats
-        const now = new Date();
-        res.json({
-          timestamp: now.toISOString(),
-          unix: Math.floor(now.getTime() / 1000),
-          formatted: now.toLocaleString(),
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        });
-      },
-    },
+    }
   ],
   events: {
     MESSAGE_RECEIVED: [
@@ -305,8 +243,8 @@ export const husbandosPlugin: Plugin = {
     ],
   },
   services: [HusbandosService],
-  actions: [helloWorldAction],
-  providers: [helloWorldProvider],
+  actions: [tokenAnalysisAction],
+  providers: [tokenAnalysisProvider],
   tests: [HusbandosPluginTestSuite],
   // dependencies: ['@elizaos/plugin-knowledge'], <--- plugin dependencies go here (if requires another plugin)
 };
