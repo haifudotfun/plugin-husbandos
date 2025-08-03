@@ -89,9 +89,9 @@ interface State {
   text: string;
 }
 
-export const StarterPluginTestSuite: TestSuite = {
-  name: 'plugin_starter_test_suite',
-  description: 'E2E tests for the starter plugin',
+export const HusbandosPluginTestSuite: TestSuite = {
+  name: 'plugin_husbandos_test_suite',
+  description: 'E2E tests for the husbandos plugin',
 
   tests: [
     /**
@@ -317,4 +317,4 @@ export const StarterPluginTestSuite: TestSuite = {
 };
 
 // Export a default instance of the test suite for the E2E test runner
-export default StarterPluginTestSuite;
+export default HusbandosPluginTestSuite;

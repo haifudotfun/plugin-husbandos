@@ -13,7 +13,7 @@ import type {
 } from '@elizaos/core';
 import { ModelType, Service, logger } from '@elizaos/core';
 import { z } from 'zod';
-import { StarterPluginTestSuite } from './tests';
+import { HusbandosPluginTestSuite } from './tests';
 
 /**
  * Defines the configuration schema for a plugin, including the validation rules for the plugin name.
@@ -21,17 +21,47 @@ import { StarterPluginTestSuite } from './tests';
  * @type {import('zod').ZodObject<{ EXAMPLE_PLUGIN_VARIABLE: import('zod').ZodString }>}
  */
 const configSchema = z.object({
-  EXAMPLE_PLUGIN_VARIABLE: z
+  API_URL: z
     .string()
-    .min(1, 'Example plugin variable is not provided')
+    .describe('The URL of the API on Haifu terminal to use')
     .optional()
-    .transform((val) => {
-      if (!val) {
-        logger.warn('Example plugin variable is not provided (this is expected)');
-      }
-      return val;
-    }),
+    .default('https://somnia-testnet-ponder-release.standardweb3.com/api'),
 });
+
+/**
+ * Example Market analysis action
+ * This demonstrates the simplest possible action structure on Haifu 
+ */
+const haifuAction: Action = {
+  name: 'HAIFU',
+  similes: ['HAIFU'],
+  description: 'Responds with a haifu message',
+  validate: async (
+    _runtime: IAgentRuntime,
+    _message: Memory,
+    _state: State | undefined
+  ): Promise<boolean> => {
+    // Always valid
+    return true;
+  },
+  handler: async (
+    _runtime: IAgentRuntime,
+    message: Memory,
+    _state: State | undefined,
+    _options: any,
+    callback?: HandlerCallback,
+    _responses?: Memory[]
+  ): Promise<ActionResult> => {
+    return {
+      text: 'hello world!',
+      success: true,
+      data: {
+        actions: ['HELLO_WORLD'],
+        source: message.content.source,
+      },
+    };
+  },
+};
 
 /**
  * Example HelloWorld action
@@ -142,26 +172,26 @@ const helloWorldProvider: Provider = {
   },
 };
 
-export class StarterService extends Service {
-  static serviceType = 'starter';
+class HusbandosService extends Service {
+  static serviceType = 'husbandos';
   capabilityDescription =
-    'This is a starter service which is attached to the agent through the starter plugin.';
+    'This is a husbandos service which is attached to the agent through the husbandos plugin.';
   constructor(protected runtime: IAgentRuntime) {
     super(runtime);
   }
 
   static async start(runtime: IAgentRuntime) {
-    logger.info(`*** Starting starter service - MODIFIED: ${new Date().toISOString()} ***`);
-    const service = new StarterService(runtime);
+    logger.info(`*** Starting husbandos service - MODIFIED: ${new Date().toISOString()} ***`);
+    const service = new HusbandosService(runtime);
     return service;
   }
 
   static async stop(runtime: IAgentRuntime) {
     logger.info('*** TESTING DEV MODE - STOP MESSAGE CHANGED! ***');
     // get the service from the runtime
-    const service = runtime.getService(StarterService.serviceType);
+    const service = runtime.getService(HusbandosService.serviceType);
     if (!service) {
-      throw new Error('Starter service not found');
+      throw new Error('Husbandos service not found');
     }
     service.stop();
   }
@@ -171,11 +201,11 @@ export class StarterService extends Service {
   }
 }
 
-export const starterPlugin: Plugin = {
+export const husbandosPlugin: Plugin = {
   name: 'plugin-husbandos',
-  description: 'Plugin starter for elizaOS',
+  description: 'ElizaOS plugin for building wAIfu agents',
   config: {
-    EXAMPLE_PLUGIN_VARIABLE: process.env.EXAMPLE_PLUGIN_VARIABLE,
+    NETWORK_URL: process.env.NETWORK_URL,
   },
   async init(config: Record<string, string>) {
     logger.info('*** TESTING DEV MODE - PLUGIN MODIFIED AND RELOADED! ***');
@@ -274,11 +304,11 @@ export const starterPlugin: Plugin = {
       },
     ],
   },
-  services: [StarterService],
+  services: [HusbandosService],
   actions: [helloWorldAction],
   providers: [helloWorldProvider],
-  tests: [StarterPluginTestSuite],
+  tests: [HusbandosPluginTestSuite],
   // dependencies: ['@elizaos/plugin-knowledge'], <--- plugin dependencies go here (if requires another plugin)
 };
 
-export default starterPlugin;
+export default husbandosPlugin;
